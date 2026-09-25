@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The River That Remembered — Narrative Tenses Review</title>
+<style>
+  :root{
+    --river-deep:#1F3A3D;
+    --river-mid:#3E6B63;
+    --river-soft:#6E948B;
+    --parchment:#F6F1E4;
+    --parchment-dark:#EDE4CE;
+    --card:#FFFDF7;
+    --bark:#6B4A32;
+    --amber:#C98A2C;
+    --leaf:#4A7856;
+    --correct:#3F7D4F;
+    --correct-bg:#E4F1E6;
+    --incorrect:#B5482F;
+    --incorrect-bg:#FBEAE5;
+    --stone-filled:#3E6B63;
+    --stone-empty:#D8CFB8;
+    --shadow: 0 8px 24px rgba(31,58,61,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(62,107,99,0.08), transparent 45%),
+      radial-gradient(circle at 90% 30%, rgba(201,138,44,0.06), transparent 40%),
+      var(--parchment);
+    color:var(--river-deep);
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    line-height:1.6;
+    padding: 24px 16px 80px;
+  }
+  .wrap{ max-width: 780px; margin: 0 auto; }
+
+  header{ text-align:center; margin-bottom: 6px; }
+  .eyebrow{
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--bark);
+    margin-bottom: 8px;
+  }
+  h1{
+    font-size: clamp(28px, 5vw, 42px);
+    margin: 0 0 10px;
+    color: var(--river-deep);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    color: var(--river-mid);
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .teacher-note{
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 12.5px;
+    color: var(--bark);
+    background: var(--parchment-dark);
+    border: 1px dashed var(--bark);
+    border-radius: 8px;
+    padding: 8px 14px;
+    max-width: 480px;
+    margin: 14px auto 0;
+  }
+
+  .hero-banner{ width:100%; height:auto; display:block; margin: 14px 0 10px; }
+
+  /* Progress river */
+  .progress-wrap{
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px 22px;
+    margin: 18px 0 30px;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  .progress-top{
+    display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 18px;
+    flex-wrap: wrap; gap: 6px;
+  }
+  .progress-top .label{ font-size:13px; color:var(--river-mid); text-transform:uppercase; letter-spacing:0.08em;}
+  .score{
+    font-family: 'Courier New', monospace;
+    font-weight:700; font-size: 18px; color: var(--river-deep);
+  }
+  .stones{
+    position: relative;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    padding: 0 4px;
+  }
+  .stones::before{
+    content:"";
+    position:absolute; left:16px; right:16px; top:16px;
+    height: 4px; background: var(--stone-empty); border-radius: 2px;
+    z-index:0;
+  }
+  .stone-col{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:6px; width: 54px;}
+  .stone{
+    width: 32px; height:32px; border-radius:50%;
+    background: var(--stone-empty);
+    border: 3px solid var(--card);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 15px;
+    transition: background 0.4s ease, transform 0.3s ease;
+  }
+  .stone svg{ width:16px; height:16px; }
+  .stone.done{ background: var(--stone-filled); }
+  .stone.current{ transform: scale(1.2); box-shadow: 0 0 0 4px rgba(62,107,99,0.18); }
+  .stone-year{ font-family:'Courier New', monospace; font-size:10.5px; color: var(--river-mid); text-align:center; }
+  .beaver-marker{
+    position:absolute; top:-2px; font-size:20px;
+    transform: translateX(-50%);
+    transition: left 0.5s ease;
+    z-index:2;
+  }
+
+  /* Chapters */
+  .chapter{
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 24px 26px 22px;
+    margin-bottom: 26px;
+    border-left: 6px solid var(--river-mid);
+    animation: rise 0.5s ease;
+    position: relative;
+  }
+  @keyframes rise{ from{ opacity:0; transform: translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .chapter[hidden]{ display:none; }
+
+  .chapter-head{ display:flex; align-items:center; gap:16px; margin-bottom: 6px; }
+  .chapter-icon{ flex: 0 0 auto; width:58px; height:58px; }
+  .chapter-icon svg{ width:100%; height:100%; }
+  .chapter-headtext{ flex:1; }
+
+  .date-stamp{
+    display:inline-block;
+    font-family:'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--bark);
+    background: var(--parchment-dark);
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin-bottom: 6px;
+  }
+  .exercise-tag{
+    display:inline-block;
+    font-family: system-ui, sans-serif;
+    font-size: 10.5px;
+    font-weight:700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    border-radius: 20px;
+    padding: 2px 10px;
+    margin: 0 0 6px 8px;
+  }
+  .chapter h2{
+    margin: 0 0 4px;
+    font-size: 22px;
+    color: var(--river-deep);
+  }
+  .story-text{
+    font-size: 17px;
+    color: #2c2c28;
+  }
+  .story-text p{ margin: 0 0 10px; }
+
+  /* Fill-in blanks */
+  .blank-wrap{ position: relative; display:inline-block; margin: 0 2px; vertical-align:baseline; }
+  .blank{
+    font-family: inherit;
+    font-size: 16px;
+    width: 126px;
+    padding: 3px 6px;
+    border: none;
+    border-bottom: 2px solid var(--bark);
+    background: rgba(201,138,44,0.08);
+    color: var(--river-deep);
+    text-align:center;
+    border-radius: 3px 3px 0 0;
+  }
+  .blank:focus-visible{ outline: 2px solid var(--amber); outline-offset: 1px; }
+  .blank.correct{ background: var(--correct-bg); border-bottom-color: var(--correct); color: var(--correct); font-weight:700; }
+  .blank.incorrect{ background: var(--incorrect-bg); border-bottom-color: var(--incorrect); color: var(--incorrect); font-weight:700; }
+  .verb-hint{
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 11px;
+    color: var(--river-mid);
+    display:block;
+    text-align:center;
+    margin-top: 1px;
+  }
+
+  /* Multiple choice */
+  .choice-wrap{ display:inline-flex; flex-wrap:wrap; gap:6px; vertical-align:middle; margin: 4px 4px; padding: 4px 6px; background: rgba(62,107,99,0.06); border-radius: 10px; }
+  .choice-opt{
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    background: var(--card);
+    border: 1.5px solid var(--river-soft);
+    color: var(--river-deep);
+    border-radius: 20px;
+    padding: 5px 13px;
+    cursor:pointer;
+    transition: all 0.15s ease;
+  }
+  .choice-opt:hover{ background: var(--river-soft); color:#fff; }
+  .choice-opt:focus-visible{ outline: 2px solid var(--amber); outline-offset:2px; }
+  .choice-opt.chosen{ background: var(--river-mid); color:#fff; border-color: var(--river-mid); }
+  .choice-wrap.correct .choice-opt.chosen{ background: var(--correct); border-color: var(--correct); }
+  .choice-wrap.incorrect .choice-opt.chosen{ background: var(--incorrect); border-color: var(--incorrect); }
+  .choice-wrap.incorrect .choice-opt.answer-reveal{ outline: 2px dashed var(--correct); }
+
+  /* Error correction */
+  .error-item{ margin-bottom: 16px; padding-bottom:14px; border-bottom: 1px dashed var(--stone-empty); }
+  .error-item:last-child{ border-bottom:none; }
+  .wrong-phrase{
+    color: var(--incorrect);
+    text-decoration: line-through wavy;
+    text-decoration-color: var(--incorrect);
+    font-weight:600;
+  }
+  .fix-row{ margin-top:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .fix-label{ font-family: system-ui, sans-serif; font-size:12.5px; color: var(--river-mid); }
+
+  .hint-btn{
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    width:19px; height:19px; border-radius:50%;
+    border: 1px solid var(--river-soft);
+    background: transparent; color: var(--river-mid);
+    cursor:pointer; line-height:1; margin-left:4px;
+    vertical-align: middle;
+  }
+  .hint-btn:hover{ background: var(--river-soft); color:#fff; }
+  .hint-text{
+    display:none;
+    font-family: system-ui, sans-serif;
+    font-size: 12.5px;
+    color: var(--bark);
+    background: var(--parchment-dark);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 6px 0 0;
+  }
+  .hint-text.show{ display:block; }
+
+  .explain{
+    font-family: system-ui, sans-serif;
+    font-size: 12.5px;
+    color: var(--incorrect);
+    display:block;
+    margin-top: 3px;
+  }
+
+  .chapter-actions{
+    display:flex; align-items:center; gap:12px; margin-top: 18px; flex-wrap: wrap;
+  }
+  button.primary{
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--river-deep);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  button.primary:hover{ background: var(--river-mid); transform: translateY(-1px); }
+  button.primary:focus-visible{ outline: 3px solid var(--amber); outline-offset:2px; }
+  button.primary[disabled]{ opacity:0.4; cursor:not-allowed; transform:none; }
+
+  .chapter-feedback{ font-family: system-ui, sans-serif; font-size: 13.5px; color: var(--river-mid); }
+
+  /* Final screen */
+  #final{
+    background: var(--river-deep);
+    color: var(--parchment);
+    border-radius: 18px;
+    padding: 34px 28px;
+    text-align:center;
+    box-shadow: var(--shadow);
+  }
+  #final h2{ font-size: 26px; margin: 0 0 8px; color:#fff; }
+  #final .final-score{ font-family:'Courier New', monospace; font-size: 40px; font-weight:700; color: var(--amber); margin: 6px 0 14px; }
+  #final p.msg{ font-family: system-ui, sans-serif; font-size:14.5px; color: #dfe8e2; max-width:440px; margin: 0 auto 20px;}
+  #final button.primary{ background: var(--amber); color: var(--river-deep); }
+  #final button.primary:hover{ background: #dba13f; }
+
+  .grammar-recap{ margin-top: 26px; text-align:left; font-family: system-ui, sans-serif; background: rgba(255,255,255,0.06); border-radius: 12px; padding: 18px 20px; }
+  .grammar-recap h3{ margin:0 0 10px; font-size:15px; color: var(--amber); font-family: Georgia, serif;}
+  .grammar-recap dl{ margin:0; }
+  .grammar-recap dt{ font-weight:700; color:#fff; margin-top:10px; font-size:13.5px;}
+  .grammar-recap dd{ margin:2px 0 0; font-size:12.8px; color:#cfdad4; }
+
+  footer{ text-align:center; margin-top: 30px; font-family: system-ui, sans-serif; font-size: 11.5px; color: var(--river-soft); }
+
+  @media (max-width:480px){
+    .chapter{ padding:18px 16px; }
+    .blank{ width: 92px; font-size:14px; }
+    .story-text{ font-size:15.5px; }
+    .chapter-icon{ width:44px; height:44px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Life Vision Upper-Intermediate · 0.2 Narrative Tenses</div>
+    <h1>The River That Remembered</h1>
+    <p class="subtitle">An interactive story review: past simple, past continuous, past perfect, present perfect simple &amp; present perfect continuous.</p>
+    <p class="teacher-note">Pro studenty: každá kapitola má jiný typ cvičení — doplňování, výběr možnosti nebo oprava chyby. Postupuj příběhem řeky až do konce.</p>
+  </header>
+
+  <svg class="hero-banner" viewBox="0 0 800 130" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <circle cx="695" cy="32" r="20" fill="var(--amber)" opacity="0.85"/>
+    <g fill="var(--leaf)" opacity="0.85">
+      <ellipse cx="80" cy="58" rx="15" ry="20"/>
+      <rect x="76" y="75" width="7" height="16" fill="var(--bark)"/>
+      <ellipse cx="122" cy="48" rx="11" ry="15"/>
+      <rect x="118" y="61" width="6" height="13" fill="var(--bark)"/>
+      <ellipse cx="600" cy="55" rx="13" ry="18"/>
+      <rect x="596" y="71" width="6" height="15" fill="var(--bark)"/>
+    </g>
+    <path d="M0 95 Q100 65 200 95 T400 95 T600 95 T800 95" stroke="var(--river-mid)" stroke-width="4" fill="none" opacity="0.55"/>
+    <path d="M0 110 Q100 80 200 110 T400 110 T600 110 T800 110" stroke="var(--river-soft)" stroke-width="3" fill="none" opacity="0.4"/>
+    <g transform="translate(360,88)">
+      <ellipse cx="0" cy="0" rx="27" ry="15" fill="var(--bark)"/>
+      <path d="M22 0 Q42 -9 40 10 Q37 23 19 14 Z" fill="var(--bark)"/>
+      <circle cx="-18" cy="-4" r="2.6" fill="var(--parchment)"/>
+      <ellipse cx="-24" cy="2" rx="6" ry="4" fill="var(--bark)"/>
+    </g>
+  </svg>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="label">Your journey down the river</span>
+      <span class="score" id="scoreDisplay">Score: 0 / 19</span>
+    </div>
+    <div class="stones" id="stones"></div>
+  </div>
+
+  <div id="chapters"></div>
+
+  <div id="final" hidden>
+    <div class="eyebrow" style="color:var(--amber)">Journey complete</div>
+    <h2>You followed the beavers all the way home.</h2>
+    <div class="final-score" id="finalScore">0 / 19</div>
+    <p class="msg" id="finalMsg"></p>
+    <button class="primary" id="toggleRecap">Show grammar recap</button>
+    <button class="primary" id="restartBtn" style="margin-left:10px;">Play again</button>
+
+    <div class="grammar-recap" id="recap" hidden>
+      <h3>Five narrative tenses, five jobs</h3>
+      <dl>
+        <dt>Past simple</dt>
+        <dd>A completed action or fact at a definite point in the past. <em>"…the last wild beaver in England disappeared."</em></dd>
+        <dt>Past continuous</dt>
+        <dd>An action in progress, often interrupted by another action. <em>"…while conservationists were surveying wildlife… they noticed something impossible."</em></dd>
+        <dt>Past perfect</dt>
+        <dd>An action completed before another point in the past. <em>"…hunters had hunted them for so long that, by 1526, the last beaver disappeared."</em></dd>
+        <dt>Present perfect simple</dt>
+        <dd>A past action with a result or relevance now, or an unfinished state. <em>"The beavers' dams have reduced flooding in nearby villages."</em></dd>
+        <dt>Present perfect continuous</dt>
+        <dd>An ongoing action, with emphasis on its duration up to now. <em>"Scientists have been studying the beavers… since that first sighting."</em></dd>
+      </dl>
+    </div>
+  </div>
+
+  <footer>Life Vision Upper-Intermediate · Unit 0.2 · vytvořeno pro procvičení vyprávěcích časů</footer>
+</div>
+
+<script>
+const ICONS = {
+  ghostBeaver: `<svg viewBox="0 0 100 100"><ellipse cx="42" cy="55" rx="28" ry="19" fill="none" stroke="#6B4A32" stroke-width="3" stroke-dasharray="5 5"/><path d="M66 55 Q86 44 84 64 Q82 79 64 69 Z" fill="none" stroke="#6B4A32" stroke-width="3" stroke-dasharray="5 5"/><circle cx="20" cy="48" r="3" fill="#6B4A32" opacity="0.45"/></svg>`,
+  pawPrint: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="62" rx="21" ry="16" fill="#3E6B63"/><ellipse cx="28" cy="36" rx="7.5" ry="9.5" fill="#3E6B63"/><ellipse cx="47" cy="27" rx="7.5" ry="9.5" fill="#3E6B63"/><ellipse cx="66" cy="31" rx="7.5" ry="9.5" fill="#3E6B63"/><ellipse cx="77" cy="45" rx="6.5" ry="8.5" fill="#3E6B63"/></svg>`,
+  damGrowth: `<svg viewBox="0 0 100 100"><rect x="14" y="62" width="72" height="11" rx="4" fill="#6B4A32"/><rect x="20" y="49" width="60" height="11" rx="4" fill="#8a6440"/><rect x="26" y="36" width="48" height="11" rx="4" fill="#6B4A32"/><path d="M32 36 q0 -20 8 -24" stroke="#4A7856" stroke-width="3.5" fill="none"/><path d="M56 36 q4 -22 13 -26" stroke="#4A7856" stroke-width="3.5" fill="none"/><circle cx="40" cy="8" r="4.5" fill="#4A7856"/><circle cx="69" cy="6" r="4.5" fill="#4A7856"/></svg>`,
+  scale: `<svg viewBox="0 0 100 100"><line x1="50" y1="12" x2="50" y2="82" stroke="#6B4A32" stroke-width="3.5"/><line x1="18" y1="28" x2="82" y2="28" stroke="#6B4A32" stroke-width="3.5"/><line x1="18" y1="28" x2="10" y2="50" stroke="#6B4A32" stroke-width="2.2"/><line x1="82" y1="28" x2="90" y2="50" stroke="#6B4A32" stroke-width="2.2"/><circle cx="10" cy="56" r="11" fill="none" stroke="#C98A2C" stroke-width="3"/><circle cx="90" cy="56" r="11" fill="none" stroke="#3E6B63" stroke-width="3"/><path d="M33 84 h34" stroke="#6B4A32" stroke-width="3.5"/></svg>`,
+  sunRiver: `<svg viewBox="0 0 100 100"><circle cx="70" cy="24" r="15" fill="#C98A2C"/><path d="M8 64 q15 -13 30 0 t30 0 t30 0" stroke="#3E6B63" stroke-width="3.5" fill="none"/><path d="M8 78 q15 -13 30 0 t30 0 t30 0" stroke="#6E948B" stroke-width="3.5" fill="none"/><path d="M20 60 q3 -15 0 -24" stroke="#4A7856" stroke-width="3.5" fill="none"/><path d="M77 60 q3 -15 0 -24" stroke="#4A7856" stroke-width="3.5" fill="none"/></svg>`
+};
+
+const chapters = [
+  {
+    type: "fill",
+    date: "before 1526",
+    title: "Gone",
+    icon: ICONS.ghostBeaver,
+    html: `For thousands of years, wild beavers {{1}} (live) in the rivers of Britain, building dams and shaping the landscape.
+    But hunters {{2}} (hunt) them for so long that, by 1526, the last wild beaver in England {{3}} (disappear) completely.
+    For the next 400 years, nobody in the country {{4}} (see) a wild beaver again — until now.`,
+    blanks: {
+      1: { answers: ["lived"], hint: "A general fact about the distant past — no need to connect it to another past event." },
+      2: { answers: ["had hunted"], hint: "This hunting happened before 1526, the point we're talking about — which action comes first?" },
+      3: { answers: ["disappeared"], hint: "This is the main past event at that specific point in time (1526)." },
+      4: { answers: ["has seen", "hasn't seen", "has not seen"], hint: "This period runs all the way up to 'now' — think of a tense that connects the past to the present." }
+    }
+  },
+  {
+    type: "choice",
+    date: "2009",
+    title: "A Secret Return",
+    icon: ICONS.pawPrint,
+    html: `In 2009, while a small team of conservationists {{5}} wildlife along the River Otter in Devon, they {{6}} something impossible: fresh paw prints and gnawed branches beside the water.
+    Following the tracks, they {{7}} a family of wild beavers swimming in the river.
+    Nobody knew for certain how they had arrived, but clearly, they {{8}} themselves at home already.`,
+    blanks: {
+      5: { answers: ["were surveying"], options: ["surveyed", "were surveying", "have surveyed"], hint: "A longer background action in progress — what were they doing when it happened?" },
+      6: { answers: ["noticed"], options: ["noticed", "were noticing", "had noticed"], hint: "The short action that interrupts the longer background action." },
+      7: { answers: ["found"], options: ["found", "were finding", "have found"], hint: "A simple, completed past action." },
+      8: { answers: ["had made"], options: ["made", "have made", "had made"], hint: "They'd already done this before the team arrived — which action came first?" }
+    }
+  },
+  {
+    type: "fill",
+    date: "since 2009",
+    title: "The Evidence Grows",
+    icon: ICONS.damGrowth,
+    html: `Since that first sighting, scientists {{9}} (study) the beavers and their surprising effect on the river.
+    So far, the results {{10}} (be) remarkable.
+    The beavers' dams {{11}} (reduce) flooding in nearby villages, and local wildlife {{12}} (increase) noticeably, as fish, insects and birds return to the wetlands the beavers created.`,
+    blanks: {
+      9: { answers: ["have been studying"], hint: "'Since' + emphasis on how long this research has been going on." },
+      10: { answers: ["have been"], hint: "A state that's true up to now — no need to stress the duration here." },
+      11: { answers: ["have reduced"], hint: "A past action with a clear result that's still true today." },
+      12: { answers: ["has increased"], hint: "Singular subject ('wildlife') + a result visible now." }
+    }
+  },
+  {
+    type: "error",
+    date: "2010s–2020",
+    title: "A Difficult Decision",
+    icon: ICONS.scale,
+    items: [
+      { num: 13, before: "Before the government ", wrong: "has approved", after: " their official return in 2020, campaigners had fought for years to protect the beavers." },
+      { num: 14, before: "Campaigners ", wrong: "have fought", after: " for more than ten years before the government finally approved their return." },
+      { num: 15, before: "Some farmers, who ", wrong: "worry", after: " about flooding, only changed their minds after visiting the river themselves." },
+      { num: 16, before: "The farmers ", wrong: "visits", after: " the river and saw the benefits with their own eyes." }
+    ],
+    blanks: {
+      13: { answers: ["approved"], hint: "A single completed action at a definite point in the past (2020)." },
+      14: { answers: ["had fought"], hint: "This happened before another past action — which tense shows 'the earlier past'?" },
+      15: { answers: ["had worried"], hint: "A state that existed before the farmers changed their minds." },
+      16: { answers: ["visited"], hint: "A simple, sequential past action — 'after' already shows the order." }
+    }
+  },
+  {
+    type: "fill",
+    date: "today",
+    title: "The River Today",
+    icon: ICONS.sunRiver,
+    html: `Today, beavers {{17}} (live) freely on the River Otter for more than a decade, and similar projects {{18}} (start) on rivers across England, Scotland and Wales.
+    The animals {{19}} (not / stop) working since the day they returned — quietly rebuilding wetlands, one branch at a time.`,
+    blanks: {
+      17: { answers: ["have been living"], hint: "'For more than a decade' — an ongoing action, duration matters here." },
+      18: { answers: ["have started"], hint: "A result that's true now — plural subject ('projects')." },
+      19: { answers: ["haven't stopped", "have not stopped"], hint: "Negative present perfect — an unfinished action continuing since a point in the past." }
+    }
+  }
+];
+
+const EXERCISE_LABELS = { fill: "Fill in the gaps", choice: "Choose the correct form", error: "Spot &amp; fix the mistake" };
+
+const chaptersEl = document.getElementById("chapters");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const stonesEl = document.getElementById("stones");
+const finalEl = document.getElementById("final");
+
+const TOTAL_BLANKS = chapters.reduce((sum, c) => sum + Object.keys(c.blanks).length, 0);
+let currentChapterIndex = 0;
+
+function normalize(str){
+  return str.trim().toLowerCase().replace(/\s+/g, " ").replace(/[’]/g, "'");
+}
+
+function answerItemWrapper(num, kind, innerHTML){
+  return `<span class="answer-item" data-num="${num}" data-kind="${kind}">${innerHTML}<span class="hint-text" id="hint-${num}"></span><span class="explain" id="explain-${num}"></span></span>`;
+}
+
+function hintButton(num){
+  return `<button type="button" class="hint-btn" data-hint-for="${num}" aria-label="Show hint">?</button>`;
+}
+
+function renderFillHTML(chapter){
+  let html = chapter.html;
+  html = html.replace(/\{\{(\d+)\}\}\s*\(([^)]+)\)/g, (match, num, verb) => {
+    const inner = `<span class="blank-wrap" data-kind="text">
+      <input type="text" class="blank" id="blank-${num}" data-num="${num}" autocomplete="off" spellcheck="false" aria-label="verb ${num}">
+      ${hintButton(num)}
+      <span class="verb-hint">(${verb})</span>
+    </span>`;
+    return answerItemWrapper(num, "text", inner);
+  });
+  return `<p>${html.replace(/\n\s+/g, " ")}</p>`;
+}
+
+function renderChoiceHTML(chapter){
+  let html = chapter.html;
+  html = html.replace(/\{\{(\d+)\}\}/g, (match, num) => {
+    const opts = chapter.blanks[num].options
+      .map((o) => `<button type="button" class="choice-opt" data-value="${o}">${o}</button>`)
+      .join("");
+    const inner = `<span class="choice-wrap" data-num="${num}" data-selected="">${opts}</span> ${hintButton(num)}`;
+    return answerItemWrapper(num, "choice", inner);
+  });
+  return `<p>${html.replace(/\n\s+/g, " ")}</p>`;
+}
+
+function renderErrorHTML(chapter){
+  return chapter.items.map((item) => {
+    const inner = `<span class="wrong-phrase">${item.wrong}</span>
+      <div class="fix-row">
+        <span class="fix-label">Fix it:</span>
+        <span class="blank-wrap" data-kind="text">
+          <input type="text" class="blank" id="blank-${item.num}" data-num="${item.num}" autocomplete="off" spellcheck="false" aria-label="correction ${item.num}" style="width:150px;">
+        </span>
+        ${hintButton(item.num)}
+      </div>`;
+    return `<div class="error-item">${item.before}${answerItemWrapper(item.num, "text", inner)}${item.after}</div>`;
+  }).join("");
+}
+
+function buildChapterHTML(chapter, index){
+  let body;
+  if (chapter.type === "fill") body = renderFillHTML(chapter);
+  else if (chapter.type === "choice") body = renderChoiceHTML(chapter);
+  else body = renderErrorHTML(chapter);
+
+  return `
+    <article class="chapter" id="chapter-${index}" ${index === 0 ? "" : "hidden"}>
+      <div class="chapter-head">
+        <div class="chapter-icon">${chapter.icon}</div>
+        <div class="chapter-headtext">
+          <span class="date-stamp">${chapter.date}</span><span class="exercise-tag">${EXERCISE_LABELS[chapter.type]}</span>
+          <h2>${chapter.title}</h2>
+        </div>
+      </div>
+      <div class="story-text">${body}</div>
+      <div class="chapter-actions">
+        <button class="primary" data-action="check" data-chapter="${index}">Check this chapter</button>
+        <button class="primary" data-action="continue" data-chapter="${index}" hidden>${index === chapters.length - 1 ? "Finish the story" : "Continue the story →"}</button>
+        <span class="chapter-feedback" id="feedback-${index}"></span>
+      </div>
+    </article>
+  `;
+}
+
+function buildStones(){
+  stonesEl.innerHTML = chapters.map((c, i) => `
+    <div class="stone-col">
+      <div class="stone" data-i="${i}">${c.icon.replace("<svg ", '<svg width="16" height="16" ')}</div>
+      <span class="stone-year">${c.date}</span>
+    </div>
+  `).join("") + `<div class="beaver-marker" id="beaverMarker" style="left:0%">🦫</div>`;
+}
+
+function render(){
+  chaptersEl.innerHTML = chapters.map(buildChapterHTML).join("");
+  buildStones();
+
+  document.querySelectorAll(".hint-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const num = btn.dataset.hintFor;
+      const chapter = chapters.find((c) => c.blanks[num]);
+      const el = document.getElementById(`hint-${num}`);
+      el.textContent = chapter.blanks[num].hint;
+      el.classList.toggle("show");
+    });
+  });
+
+  document.querySelectorAll(".choice-opt").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".choice-wrap");
+      group.querySelectorAll(".choice-opt").forEach((b) => b.classList.remove("chosen", "answer-reveal"));
+      group.classList.remove("correct", "incorrect");
+      btn.classList.add("chosen");
+      group.dataset.selected = btn.dataset.value;
+    });
+  });
+
+  document.querySelectorAll('[data-action="check"]').forEach((btn) => {
+    btn.addEventListener("click", () => checkChapter(parseInt(btn.dataset.chapter, 10)));
+  });
+  document.querySelectorAll('[data-action="continue"]').forEach((btn) => {
+    btn.addEventListener("click", () => goToNextChapter(parseInt(btn.dataset.chapter, 10)));
+  });
+
+  updateScore();
+  updateStones();
+}
+
+function getItemValue(item){
+  if (item.dataset.kind === "choice") {
+    const group = item.querySelector(".choice-wrap");
+    return group ? group.dataset.selected || "" : "";
+  }
+  const input = item.querySelector("input.blank");
+  return input ? input.value : "";
+}
+
+function setItemResult(item, correct){
+  if (item.dataset.kind === "choice") {
+    const group = item.querySelector(".choice-wrap");
+    group.classList.toggle("correct", correct);
+    group.classList.toggle("incorrect", !correct);
+  } else {
+    const input = item.querySelector("input.blank");
+    input.classList.remove("correct", "incorrect");
+    input.classList.add(correct ? "correct" : "incorrect");
+  }
+}
+
+function checkChapter(index){
+  const chapter = chapters[index];
+  const chapterEl = document.getElementById(`chapter-${index}`);
+  let correctCount = 0;
+  const nums = Object.keys(chapter.blanks);
+
+  nums.forEach((num) => {
+    const item = chapterEl.querySelector(`.answer-item[data-num="${num}"]`);
+    const userVal = normalize(getItemValue(item));
+    const isCorrect = chapter.blanks[num].answers.some((a) => normalize(a) === userVal);
+    setItemResult(item, isCorrect);
+    const explain = document.getElementById(`explain-${num}`);
+    if (item.dataset.kind === "choice") {
+      explain.textContent = "";
+      if (!isCorrect) {
+        const group = item.querySelector(".choice-wrap");
+        const correctBtn = Array.from(group.querySelectorAll(".choice-opt")).find(
+          (b) => normalize(b.dataset.value) === normalize(chapter.blanks[num].answers[0])
+        );
+        if (correctBtn) correctBtn.classList.add("answer-reveal");
+      }
+    } else {
+      explain.textContent = isCorrect ? "" : `→ ${chapter.blanks[num].answers[0]}`;
+    }
+    if (isCorrect) correctCount++;
+  });
+
+  const feedback = document.getElementById(`feedback-${index}`);
+  feedback.textContent = `${correctCount} / ${nums.length} correct`;
+
+  document.querySelector(`[data-action="continue"][data-chapter="${index}"]`).hidden = false;
+  updateScore();
+}
+
+function goToNextChapter(index){
+  const nextIndex = index + 1;
+  document.getElementById(`chapter-${index}`).hidden = true;
+  currentChapterIndex = nextIndex;
+  updateStones();
+
+  if (nextIndex < chapters.length) {
+    const nextChapterEl = document.getElementById(`chapter-${nextIndex}`);
+    nextChapterEl.hidden = false;
+    if (typeof nextChapterEl.scrollIntoView === "function") {
+      nextChapterEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  } else {
+    showFinal();
+  }
+}
+
+function updateScore(){
+  let total = 0;
+  document.querySelectorAll(".answer-item").forEach((item) => {
+    if (item.dataset.kind === "choice") {
+      const group = item.querySelector(".choice-wrap");
+      if (group && group.classList.contains("correct")) total++;
+    } else {
+      const input = item.querySelector("input.blank");
+      if (input && input.classList.contains("correct")) total++;
+    }
+  });
+  scoreDisplay.textContent = `Score: ${total} / ${TOTAL_BLANKS}`;
+  return total;
+}
+
+function updateStones(){
+  const stones = stonesEl.querySelectorAll(".stone");
+  stones.forEach((stone, i) => {
+    stone.classList.toggle("done", i < currentChapterIndex);
+    stone.classList.toggle("current", i === currentChapterIndex);
+  });
+  const pct = chapters.length <= 1 ? 0 : (currentChapterIndex / (chapters.length - 1)) * 100;
+  const marker = document.getElementById("beaverMarker");
+  if (marker) marker.style.left = `calc(${pct}%)`;
+}
+
+function showFinal(){
+  const total = updateScore();
+  finalEl.hidden = false;
+  document.getElementById("finalScore").textContent = `${total} / ${TOTAL_BLANKS}`;
+  let msg;
+  const pct = total / TOTAL_BLANKS;
+  if (pct === 1) msg = "Perfect tracking! Every tense exactly where it belongs — the beavers would be proud.";
+  else if (pct >= 0.8) msg = "Excellent work! Just a few tenses to review — check the explanations above.";
+  else if (pct >= 0.5) msg = "Good progress! The narrative tenses are starting to click — a second read-through will help.";
+  else msg = "This story needs a second visit. Look back at the ✗ answers and the hints, then try again!";
+  document.getElementById("finalMsg").textContent = msg;
+  if (typeof finalEl.scrollIntoView === "function") {
+    finalEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+document.getElementById("toggleRecap").addEventListener("click", (e) => {
+  const recap = document.getElementById("recap");
+  recap.hidden = !recap.hidden;
+  e.target.textContent = recap.hidden ? "Show grammar recap" : "Hide grammar recap";
+});
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+  currentChapterIndex = 0;
+  finalEl.hidden = true;
+  document.getElementById("recap").hidden = true;
+  document.getElementById("toggleRecap").textContent = "Show grammar recap";
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+render();
+</script>
+</body>
+</html>
