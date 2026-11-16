@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game On! — Unit 1 Review</title>
+<style>
+  :root{
+    --ink:#262042;
+    --magenta:#E31C79;
+    --magenta-soft:#F2A6C6;
+    --teal:#0F9B8E;
+    --amber:#FFB627;
+    --bg:#FBF3E6;
+    --card:#FFFDF8;
+    --card-dark:#F3E8D6;
+    --correct:#1E8E5A;
+    --correct-bg:#E1F5EA;
+    --incorrect:#D33F3F;
+    --incorrect-bg:#FCE7E7;
+    --stone-empty:#E3D6C2;
+    --shadow: 0 8px 24px rgba(38,32,66,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 0%, rgba(227,28,121,0.07), transparent 45%),
+      radial-gradient(circle at 90% 25%, rgba(15,155,142,0.08), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+    line-height:1.6;
+    padding: 24px 16px 80px;
+  }
+  .wrap{ max-width: 800px; margin: 0 auto; }
+
+  header{ text-align:center; margin-bottom: 6px; }
+  .eyebrow{ font-family:'Courier New', monospace; letter-spacing:0.16em; text-transform:uppercase; font-size:12px; color:var(--magenta); font-weight:700; margin-bottom:8px; }
+  h1{ font-size: clamp(30px, 5.2vw, 46px); margin:0 0 10px; color:var(--ink); font-weight:800; letter-spacing:-0.01em; }
+  .subtitle{ font-size:15px; color:var(--teal); font-weight:600; max-width:560px; margin:0 auto; }
+  .teacher-note{ font-family: 'Segoe UI', sans-serif; font-size:12.5px; color:var(--ink); background:var(--card-dark); border:2px dashed var(--magenta-soft); border-radius:12px; padding:8px 14px; max-width:520px; margin:14px auto 0; }
+
+  .hero-banner{ width:100%; height:auto; display:block; margin: 16px 0 10px; }
+
+  .progress-wrap{ background:var(--card); border-radius:18px; box-shadow:var(--shadow); padding:18px 20px 22px; margin:18px 0 30px; border: 3px solid var(--ink); }
+  .progress-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px; flex-wrap:wrap; gap:6px; }
+  .progress-top .label{ font-size:12.5px; color:var(--teal); text-transform:uppercase; letter-spacing:0.08em; font-weight:700; }
+  .score{ font-family:'Courier New', monospace; font-weight:800; font-size:19px; color:var(--ink); background: var(--amber); padding: 3px 12px; border-radius: 8px; border: 2px solid var(--ink); }
+  .stones{ position:relative; display:flex; justify-content:space-between; align-items:flex-end; padding:0 2px; }
+  .stones::before{ content:""; position:absolute; left:12px; right:12px; top:14px; height:5px; background:var(--stone-empty); border-radius:3px; z-index:0; }
+  .stone-col{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:4px; width:40px; }
+  .stone{ width:30px; height:30px; border-radius:8px; background:var(--stone-empty); border:3px solid var(--card); display:flex; align-items:center; justify-content:center; transition: background 0.4s ease, transform 0.3s ease; transform: rotate(45deg); }
+  .stone svg{ width:15px; height:15px; transform: rotate(-45deg); }
+  .stone.done{ background:var(--teal); }
+  .stone.current{ transform:rotate(45deg) scale(1.25); box-shadow:0 0 0 4px rgba(227,28,121,0.22); }
+  .stone.bonus{ background: var(--amber); }
+  .stone-label{ font-family:'Courier New', monospace; font-size:9px; color:var(--ink); text-align:center; font-weight:700; }
+
+  .station{ background:var(--card); border-radius:18px; box-shadow:var(--shadow); padding:24px 26px 22px; margin-bottom:26px; border:3px solid var(--ink); position:relative; }
+  .station.bonus-station{ border-color: var(--amber); background: linear-gradient(135deg, #FFFDF8 0%, #FFF7E6 100%); }
+  @keyframes rise{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .station{ animation: rise 0.5s ease; }
+  .station[hidden]{ display:none; }
+
+  .station-head{ display:flex; align-items:center; gap:16px; margin-bottom:6px; }
+  .station-icon{ flex:0 0 auto; width:54px; height:54px; background: var(--ink); border-radius: 12px; display:flex; align-items:center; justify-content:center; padding: 8px; }
+  .station-icon svg{ width:100%; height:100%; }
+  .tag-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .sub-tag{ display:inline-block; font-family:'Courier New', monospace; font-size:11.5px; color:#fff; background:var(--magenta); border-radius:20px; padding:3px 11px; font-weight:700; }
+  .sub-tag.bonus-tag{ background: var(--amber); color: var(--ink); }
+  .exercise-tag{ display:inline-block; font-family: sans-serif; font-size:10.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--teal); border:2px solid var(--teal); border-radius:20px; padding:2px 10px; }
+  .station h2{ margin:6px 0 0; font-size:22px; color:var(--ink); font-weight:800; }
+
+  .story-text{ font-size:16.5px; color:#2c2c28; }
+  .story-text p{ margin:10px 0; }
+
+  .blank-wrap{ position:relative; display:inline-block; margin:0 2px; vertical-align:baseline; }
+  .blank{ font-family:inherit; font-size:16px; width:160px; padding:4px 8px; border:none; border-bottom:3px solid var(--ink); background:rgba(255,182,39,0.15); color:var(--ink); text-align:center; border-radius:6px 6px 0 0; }
+  .blank:focus-visible{ outline:2px solid var(--magenta); outline-offset:1px; }
+  .blank.correct{ background:var(--correct-bg); border-bottom-color:var(--correct); color:var(--correct); font-weight:700; }
+  .blank.incorrect{ background:var(--incorrect-bg); border-bottom-color:var(--incorrect); color:var(--incorrect); font-weight:700; }
+  .letter-hint{ font-family:'Courier New', monospace; font-weight:800; font-size:14px; color:var(--magenta); margin-right:2px; }
+
+  .choice-wrap{ display:inline-flex; flex-wrap:wrap; gap:6px; vertical-align:middle; margin:4px 4px; padding:4px 6px; background:rgba(15,155,142,0.08); border-radius:12px; }
+  .choice-opt{ font-family: sans-serif; font-size:13px; background:var(--card); border:2px solid var(--teal); color:var(--ink); border-radius:20px; padding:5px 12px; cursor:pointer; transition: all 0.15s ease; font-weight:600; }
+  .choice-opt:hover{ background:var(--teal); color:#fff; }
+  .choice-opt:focus-visible{ outline:2px solid var(--magenta); outline-offset:2px; }
+  .choice-opt.chosen{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .choice-wrap.correct .choice-opt.chosen{ background:var(--correct); border-color:var(--correct); }
+  .choice-wrap.incorrect .choice-opt.chosen{ background:var(--incorrect); border-color:var(--incorrect); }
+  .choice-wrap.incorrect .choice-opt.answer-reveal{ outline:2px dashed var(--correct); }
+
+  .hint-btn{ font-family: sans-serif; font-size:11px; width:20px; height:20px; border-radius:50%; border:2px solid var(--magenta); background:transparent; color:var(--magenta); cursor:pointer; line-height:1; margin-left:4px; vertical-align:middle; font-weight:700; }
+  .hint-btn:hover{ background:var(--magenta); color:#fff; }
+  .hint-text{ display:none; font-family: sans-serif; font-size:12.5px; color:var(--ink); background:var(--card-dark); border-radius:8px; padding:6px 10px; margin:6px 0 0; }
+  .hint-text.show{ display:block; }
+  .explain{ font-family: sans-serif; font-size:12.5px; color:var(--incorrect); display:block; margin-top:3px; font-weight:600; }
+
+  .station-actions{ display:flex; align-items:center; gap:12px; margin-top:18px; flex-wrap:wrap; }
+  button.primary{ font-family: sans-serif; background:var(--ink); color:#fff; border:none; padding:11px 22px; border-radius:30px; font-size:14.5px; font-weight:700; cursor:pointer; transition: transform 0.15s ease, background 0.2s ease; }
+  button.primary:hover{ background:var(--magenta); transform:translateY(-1px); }
+  button.primary:focus-visible{ outline:3px solid var(--amber); outline-offset:2px; }
+  button.primary[disabled]{ opacity:0.4; cursor:not-allowed; transform:none; }
+  .station-feedback{ font-family: sans-serif; font-size:13.5px; color:var(--teal); font-weight:700; }
+
+  #final{ background:var(--ink); color:var(--bg); border-radius:20px; padding:34px 28px; text-align:center; box-shadow:var(--shadow); border: 3px solid var(--magenta); }
+  #final h2{ font-size:26px; margin:0 0 8px; color:#fff; }
+  .score-row{ display:flex; justify-content:center; gap:24px; margin: 10px 0 16px; flex-wrap:wrap; }
+  .score-box{ background: rgba(255,255,255,0.08); border-radius:14px; padding: 12px 22px; }
+  .score-box .label{ font-family: sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--amber); }
+  .score-box .value{ font-family:'Courier New', monospace; font-size:32px; font-weight:800; color:#fff; }
+  #final p.msg{ font-family: sans-serif; font-size:14.5px; color:#e9e2f5; max-width:460px; margin:0 auto 18px; }
+  #final button.primary{ background:var(--magenta); color:#fff; }
+  #final button.primary:hover{ background:var(--amber); color: var(--ink); }
+
+  .weak-areas{ margin-top:22px; text-align:left; font-family: sans-serif; background:rgba(255,255,255,0.06); border-radius:12px; padding:16px 20px; }
+  .weak-areas h3{ margin:0 0 10px; font-size:14.5px; color:var(--amber); }
+  .weak-areas ul{ margin:0; padding-left:18px; }
+  .weak-areas li{ font-size:13px; color:#e9e2f5; margin-bottom:5px; }
+  .weak-areas .all-good{ font-size:13.5px; color:#e9e2f5; }
+
+  footer{ text-align:center; margin-top:30px; font-family: sans-serif; font-size:11.5px; color:var(--teal); }
+
+  @media (max-width:480px){
+    .station{ padding:18px 16px; }
+    .blank{ width:120px; font-size:14px; }
+    .story-text{ font-size:15px; }
+    .station-icon{ width:42px; height:42px; }
+    .stone-col{ width:32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Life Vision Intermediate · Unit 1 — That's entertainment</div>
+    <h1>Game On!</h1>
+    <p class="subtitle">A 9-round arcade review of the whole unit — vocabulary, narrative tenses, used to, and more.</p>
+    <p class="teacher-note">Pro studenty: projdi postupně kola 1–8. Kolo 9 je bonusové (pokročilejší slovní zásoba) — dej si ho, pokud chceš výzvu navíc!</p>
+  </header>
+
+  <svg class="hero-banner" viewBox="0 0 800 110" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <!-- dashed path -->
+    <path d="M10 90 H770" stroke="var(--stone-empty)" stroke-width="4" stroke-dasharray="1 12" stroke-linecap="round"/>
+    <!-- dice -->
+    <g transform="translate(70,55)">
+      <rect x="-20" y="-20" width="40" height="40" rx="8" fill="var(--card)" stroke="var(--ink)" stroke-width="4" transform="rotate(-12)"/>
+      <circle cx="-8" cy="-10" r="3.4" fill="var(--ink)" transform="rotate(-12)"/>
+      <circle cx="8" cy="-10" r="3.4" fill="var(--ink)" transform="rotate(-12)"/>
+      <circle cx="0" cy="0" r="3.4" fill="var(--ink)" transform="rotate(-12)"/>
+      <circle cx="-8" cy="10" r="3.4" fill="var(--ink)" transform="rotate(-12)"/>
+      <circle cx="8" cy="10" r="3.4" fill="var(--ink)" transform="rotate(-12)"/>
+    </g>
+    <!-- joystick -->
+    <g transform="translate(230,60)">
+      <rect x="-24" y="8" width="48" height="20" rx="6" fill="var(--teal)"/>
+      <circle cx="-10" cy="18" r="4" fill="var(--card)"/>
+      <circle cx="4" cy="18" r="4" fill="var(--card)"/>
+      <circle cx="18" cy="18" r="4" fill="var(--card)"/>
+      <line x1="0" y1="8" x2="0" y2="-16" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="0" cy="-20" r="8" fill="var(--magenta)"/>
+    </g>
+    <!-- game token path dots -->
+    <circle cx="380" cy="90" r="7" fill="var(--stone-empty)"/>
+    <circle cx="440" cy="90" r="7" fill="var(--stone-empty)"/>
+    <circle cx="500" cy="90" r="7" fill="var(--stone-empty)"/>
+    <circle cx="560" cy="90" r="9" fill="var(--magenta)"/>
+    <!-- controller -->
+    <g transform="translate(650,58)">
+      <path d="M-30 0 Q-30 -14 -14 -14 H14 Q30 -14 30 0 Q30 16 18 16 Q10 16 6 8 H-6 Q-10 16 -18 16 Q-30 16 -30 0 Z" fill="var(--ink)"/>
+      <circle cx="-16" cy="0" r="4" fill="var(--card)"/>
+      <circle cx="16" cy="-5" r="3" fill="var(--magenta)"/>
+      <circle cx="22" cy="2" r="3" fill="var(--teal)"/>
+    </g>
+    <!-- trophy at finish -->
+    <g transform="translate(745,45)">
+      <path d="M-14 -18 H14 V-2 Q14 10 0 10 Q-14 10 -14 -2 Z" fill="var(--amber)" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M-14 -14 Q-26 -14 -24 -2 Q-22 6 -14 4" fill="none" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M14 -14 Q26 -14 24 -2 Q22 6 14 4" fill="none" stroke="var(--ink)" stroke-width="3"/>
+      <rect x="-5" y="10" width="10" height="8" fill="var(--ink)"/>
+      <rect x="-14" y="18" width="28" height="6" rx="2" fill="var(--ink)"/>
+    </g>
+  </svg>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="label">Your route through the arcade</span>
+      <span class="score" id="scoreDisplay">Score: 0 / 30</span>
+    </div>
+    <div class="stones" id="stones"></div>
+  </div>
+
+  <div id="stations"></div>
+
+  <div id="final" hidden>
+    <div class="eyebrow" style="color:var(--amber)">Game complete</div>
+    <h2>You've cleared the whole arcade!</h2>
+    <div class="score-row">
+      <div class="score-box"><div class="label">Core score</div><div class="value" id="coreScoreDisplay">0 / 30</div></div>
+      <div class="score-box"><div class="label">Bonus score</div><div class="value" id="bonusScoreDisplay">— / 5</div></div>
+    </div>
+    <p class="msg" id="finalMsg"></p>
+    <button class="primary" id="restartBtn">Play again</button>
+    <div class="weak-areas" id="weakAreas"></div>
+  </div>
+
+  <footer>Life Vision Intermediate · Unit 1 · opakování před testem</footer>
+</div>
+
+<script>
+const ICONS = {
+  dice: `<svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" rx="14" fill="none" stroke="#fff" stroke-width="6"/><circle cx="32" cy="32" r="6" fill="#fff"/><circle cx="68" cy="32" r="6" fill="#fff"/><circle cx="50" cy="50" r="6" fill="#fff"/><circle cx="32" cy="68" r="6" fill="#fff"/><circle cx="68" cy="68" r="6" fill="#fff"/></svg>`,
+  magnify: `<svg viewBox="0 0 100 100"><circle cx="42" cy="42" r="26" fill="none" stroke="#fff" stroke-width="7"/><line x1="61" y1="61" x2="85" y2="85" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>`,
+  book: `<svg viewBox="0 0 100 100"><path d="M50 25 C40 15 20 15 15 20 V78 C20 73 40 73 50 82 C60 73 80 73 85 78 V20 C80 15 60 15 50 25 Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><line x1="50" y1="25" x2="50" y2="82" stroke="#fff" stroke-width="5"/></svg>`,
+  shield: `<svg viewBox="0 0 100 100"><path d="M50 12 L84 26 V52 C84 74 68 88 50 92 C32 88 16 74 16 52 V26 Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><path d="M36 50 L46 60 L66 38" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  face: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" fill="none" stroke="#fff" stroke-width="6"/><circle cx="38" cy="42" r="4.5" fill="#fff"/><circle cx="62" cy="42" r="4.5" fill="#fff"/><path d="M34 62 Q50 76 66 62" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>`,
+  hourglass: `<svg viewBox="0 0 100 100"><path d="M28 15 H72 L54 50 L72 85 H28 L46 50 Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><line x1="24" y1="15" x2="76" y2="15" stroke="#fff" stroke-width="6" stroke-linecap="round"/><line x1="24" y1="85" x2="76" y2="85" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>`,
+  headphones: `<svg viewBox="0 0 100 100"><path d="M20 55 V45 A30 30 0 0 1 80 45 V55" fill="none" stroke="#fff" stroke-width="6"/><rect x="12" y="52" width="16" height="26" rx="6" fill="#fff"/><rect x="72" y="52" width="16" height="26" rx="6" fill="#fff"/></svg>`,
+  megaphone: `<svg viewBox="0 0 100 100"><path d="M20 45 L55 25 V75 L20 55 Z" fill="#fff"/><path d="M20 45 H12 V55 H20 Z" fill="#fff"/><path d="M55 25 Q80 15 85 30 Q90 45 80 50" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>`,
+  star: `<svg viewBox="0 0 100 100"><path d="M50 10 L61 38 L91 40 L67 58 L76 88 L50 70 L24 88 L33 58 L9 40 L39 38 Z" fill="#fff"/></svg>`
+};
+
+const stations = [
+  {
+    type: "fill",
+    sub: "1.1",
+    title: "Games and gaming",
+    icon: ICONS.dice,
+    html: `This game is very difficult. I'm going to {{1}} and read my book instead.
+    You can't look at her cards! You're {{2}}!
+    We only have one bike, so the children have to {{3}} riding it.
+    In this game, you need to know the right answer. You can't {{4}} or you'll lose.`,
+    blanks: {
+      1: { answers: ["give up"], hint: "To stop trying because something is too hard." },
+      2: { answers: ["cheating"], hint: "Breaking the rules to win — with an -ing ending here." },
+      3: { answers: ["take turns"], hint: "Each person does something one after another, not at the same time." },
+      4: { answers: ["guess"], hint: "To say an answer without being sure it's correct." }
+    }
+  },
+  {
+    type: "fill",
+    sub: "1.2",
+    title: "Narrative tenses",
+    icon: ICONS.magnify,
+    html: `When Harry got home, he noticed that someone {{5}} into his house.
+    The police {{6}} for fingerprints when they noticed the clean carpet.
+    Harry {{7}} the police as soon as he saw the broken window.
+    The thief {{8}} by the time the police arrived.`,
+    blanks: {
+      5: { answers: ["had broken"], hint: "This happened before Harry noticed it — past perfect." },
+      6: { answers: ["were looking"], hint: "An action in progress at a certain moment — past continuous." },
+      7: { answers: ["called"], hint: "A simple completed action — past simple." },
+      8: { answers: ["had already left"], hint: "This happened before the police arrived — past perfect, with 'already'." }
+    }
+  },
+  {
+    type: "choice",
+    sub: "1.3",
+    title: "I've heard that one before!",
+    icon: ICONS.book,
+    html: `After years of hard work, she finally {{9}} success.
+    The story had a very {{10}} start — the family had nothing.
+    He needs to {{11}} the challenge if he wants to succeed.
+    Things started to {{12}} badly for the main character.`,
+    blanks: {
+      9: { answers: ["achieved"], options: ["achieved", "did", "made"], hint: "The correct verb to go with 'success' in this collocation." },
+      10: { answers: ["difficult"], options: ["difficult", "hard", "bad"], hint: "This adjective collocates with 'start' in the article." },
+      11: { answers: ["meet"], options: ["meet", "do", "make"], hint: "The correct verb to go with 'the challenge'." },
+      12: { answers: ["finish"], options: ["finish", "end", "stop"], hint: "The correct verb to go with 'badly' in the article." }
+    }
+  },
+  {
+    type: "fill",
+    sub: "1.4",
+    title: "Online safety",
+    icon: ICONS.shield,
+    html: `Someone pretended to be my friend online and asked for money — it was a {{13}}.
+    Criminals attacked the company's computers and stole information — this is called {{14}}.
+    Copying and selling films illegally online is called {{15}}.
+    Never give your bank details to someone you don't know by email — it might be {{16}}.`,
+    blanks: {
+      13: { answers: ["friendship scam"], hint: "Someone pretends to like or be friends with you, then asks for money." },
+      14: { answers: ["hacking"], hint: "Breaking into a computer system without permission." },
+      15: { answers: ["piracy"], hint: "Illegally copying and selling films, music or software." },
+      16: { answers: ["phishing"], hint: "A fake email or message trying to trick you into giving personal information." }
+    }
+  },
+  {
+    type: "fill",
+    sub: "1.5",
+    title: "Feelings adjectives",
+    icon: ICONS.face,
+    html: `I was really {{17}} when I found $50 in my old jacket pocket!
+    She felt very {{18}} after she fell over in front of everyone.
+    He was completely {{19}} that his team would win the match.
+    I get really {{20}} when I have to speak in front of a big group.`,
+    blanks: {
+      17: { answers: ["amazed", "delighted"], hint: "A strong positive reaction to a nice surprise." },
+      18: { answers: ["embarrassed"], hint: "The feeling when something makes you feel silly in front of others." },
+      19: { answers: ["convinced"], hint: "Feeling very sure that something is true." },
+      20: { answers: ["nervous"], hint: "The feeling before doing something you're worried about." }
+    }
+  },
+  {
+    type: "choice",
+    sub: "1.6",
+    title: "Used to / get used to / be used to",
+    icon: ICONS.hourglass,
+    html: `I {{21}} hate vegetables, but now I love them.
+    Did you {{22}} live in London?
+    It took him months to {{23}} the new time zone.
+    She's {{24}} working night shifts now — she's done it for years.`,
+    blanks: {
+      21: { answers: ["used to"], options: ["used to", "use to", "would"], hint: "Statement about a past habit that isn't true now." },
+      22: { answers: ["use to"], options: ["used to", "use to", "uses to"], hint: "After 'did', we need the base form." },
+      23: { answers: ["get used to"], options: ["get used to", "be used to", "used to"], hint: "The process of becoming familiar with something new." },
+      24: { answers: ["be used to"], options: ["get used to", "be used to", "used to"], hint: "She's already familiar with it — a present state, not a process." }
+    }
+  },
+  {
+    type: "fill",
+    sub: "1.7",
+    title: "I'll never forget the day!",
+    icon: ICONS.headphones,
+    html: `Grandma gave me some {{25}} to spend at the shop.
+    I was so {{26}} when my sister lent me the money I needed.
+    He was so upset that he started to {{27}}.`,
+    blanks: {
+      25: { answers: ["pocket money"], hint: "Money that parents/grandparents give children regularly." },
+      26: { answers: ["grateful"], hint: "Feeling thankful for something someone did for you." },
+      27: { answers: ["burst into tears"], hint: "To suddenly start crying." }
+    }
+  },
+  {
+    type: "choice",
+    sub: "1.8",
+    title: "Once upon a time...",
+    icon: ICONS.megaphone,
+    html: `{{28}} my life changed forever.
+    There were ten of us {{29}} the room.
+    {{30}}, we heard a loud crash outside.`,
+    blanks: {
+      28: { answers: ["I'll never forget the day when"], options: ["I'll never forget the day when", "It was the middle of", "As soon as"], hint: "A classic Phrasebook opening line for a story." },
+      29: { answers: ["in"], options: ["in", "at", "on"], hint: "The correct preposition with 'the room'." },
+      30: { answers: ["Suddenly"], options: ["Suddenly", "Finally", "Never"], hint: "A word that signals something unexpected happening." }
+    }
+  },
+  {
+    type: "fill",
+    sub: "BONUS",
+    title: "Advanced vocabulary challenge",
+    icon: ICONS.star,
+    bonus: true,
+    html: `Nobody expected the {{31}} at the end of the story.
+    Asking for your bank details by email is a huge {{32}}.
+    After years of practice, playing the piano became {{33}} to her.
+    She was {{34}} by how kind everyone was.
+    The two teams were {{35}} until the very last minute.`,
+    blanks: {
+      31: { answers: ["twist"], hint: "An unexpected change in the plot of a story." },
+      32: { answers: ["red flag"], hint: "A warning sign that something is wrong." },
+      33: { answers: ["second nature"], hint: "Something so familiar it feels automatic." },
+      34: { answers: ["taken aback"], hint: "Surprised or shocked by something." },
+      35: { answers: ["neck and neck"], hint: "So close in a competition that neither side is winning." }
+    }
+  }
+];
+
+const EXERCISE_LABELS = { fill: "Fill in the gaps", choice: "Choose the correct form" };
+
+const stationsEl = document.getElementById("stations");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const stonesEl = document.getElementById("stones");
+const finalEl = document.getElementById("final");
+
+const CORE_STATIONS = stations.filter((s) => !s.bonus);
+const TOTAL_BLANKS = CORE_STATIONS.reduce((sum, c) => sum + Object.keys(c.blanks).length, 0);
+const BONUS_BLANKS = stations.filter((s) => s.bonus).reduce((sum, c) => sum + Object.keys(c.blanks).length, 0);
+let currentIndex = 0;
+
+function normalize(str){
+  return str.trim().toLowerCase().replace(/\s+/g, " ").replace(/[’]/g, "'").replace(/[.,!?]+$/, "");
+}
+
+function answerItemWrapper(num, kind, innerHTML){
+  return `<span class="answer-item" data-num="${num}" data-kind="${kind}">${innerHTML}<span class="hint-text" id="hint-${num}"></span><span class="explain" id="explain-${num}"></span></span>`;
+}
+function hintButton(num){
+  return `<button type="button" class="hint-btn" data-hint-for="${num}" aria-label="Show hint">?</button>`;
+}
+
+function renderFillHTML(station){
+  let html = station.html;
+  html = html.replace(/\{\{(\d+)\}\}/g, (match, num) => {
+    const firstLetter = station.blanks[num].answers[0].trim().charAt(0);
+    const inner = `<span class="letter-hint">(${firstLetter})</span><span class="blank-wrap" data-kind="text">
+      <input type="text" class="blank" id="blank-${num}" data-num="${num}" autocomplete="off" spellcheck="false" aria-label="answer ${num}">
+      ${hintButton(num)}
+    </span>`;
+    return answerItemWrapper(num, "text", inner);
+  });
+  return html.split(/\n\s*\n/).map((seg) => `<p>${seg.replace(/\n\s+/g, " ").trim()}</p>`).join("");
+}
+
+function renderChoiceHTML(station){
+  let html = station.html;
+  html = html.replace(/\{\{(\d+)\}\}/g, (match, num) => {
+    const opts = station.blanks[num].options
+      .map((o) => `<button type="button" class="choice-opt" data-value="${o}">${o}</button>`)
+      .join("");
+    const inner = `<span class="choice-wrap" data-num="${num}" data-selected="">${opts}</span> ${hintButton(num)}`;
+    return answerItemWrapper(num, "choice", inner);
+  });
+  return html.split(/\n\s*\n/).map((seg) => `<p>${seg.replace(/\n\s+/g, " ").trim()}</p>`).join("");
+}
+
+function buildStationHTML(station, index){
+  const body = station.type === "fill" ? renderFillHTML(station) : renderChoiceHTML(station);
+  const isBonus = !!station.bonus;
+  return `
+    <article class="station ${isBonus ? "bonus-station" : ""}" id="station-${index}" ${index === 0 ? "" : "hidden"}>
+      <div class="station-head">
+        <div class="station-icon">${station.icon}</div>
+        <div>
+          <div class="tag-row">
+            <span class="sub-tag ${isBonus ? "bonus-tag" : ""}">${station.sub}</span><span class="exercise-tag">${EXERCISE_LABELS[station.type]}</span>
+          </div>
+          <h2>${station.title}</h2>
+        </div>
+      </div>
+      <div class="story-text">${body}</div>
+      <div class="station-actions">
+        <button class="primary" data-action="check" data-station="${index}">Check this round</button>
+        <button class="primary" data-action="continue" data-station="${index}" hidden>${index === stations.length - 1 ? "Finish the game" : (isBonus ? "Finish the game" : "Next round →")}</button>
+        <span class="station-feedback" id="feedback-${index}"></span>
+      </div>
+    </article>
+  `;
+}
+
+function buildStones(){
+  stonesEl.innerHTML = stations.map((s, i) => `
+    <div class="stone-col">
+      <div class="stone ${s.bonus ? "bonus" : ""}" data-i="${i}">${s.icon.replace("<svg ", '<svg width="15" height="15" ')}</div>
+      <span class="stone-label">${s.sub}</span>
+    </div>
+  `).join("");
+}
+
+function render(){
+  stationsEl.innerHTML = stations.map(buildStationHTML).join("");
+  buildStones();
+
+  document.querySelectorAll(".hint-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const num = btn.dataset.hintFor;
+      const station = stations.find((s) => s.blanks[num]);
+      const el = document.getElementById(`hint-${num}`);
+      el.textContent = station.blanks[num].hint;
+      el.classList.toggle("show");
+    });
+  });
+
+  document.querySelectorAll(".choice-opt").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".choice-wrap");
+      group.querySelectorAll(".choice-opt").forEach((b) => b.classList.remove("chosen", "answer-reveal"));
+      group.classList.remove("correct", "incorrect");
+      btn.classList.add("chosen");
+      group.dataset.selected = btn.dataset.value;
+    });
+  });
+
+  document.querySelectorAll('[data-action="check"]').forEach((btn) => {
+    btn.addEventListener("click", () => checkStation(parseInt(btn.dataset.station, 10)));
+  });
+  document.querySelectorAll('[data-action="continue"]').forEach((btn) => {
+    btn.addEventListener("click", () => goToNext(parseInt(btn.dataset.station, 10)));
+  });
+
+  updateScore();
+  updateStones();
+}
+
+function getItemValue(item){
+  if (item.dataset.kind === "choice") {
+    const group = item.querySelector(".choice-wrap");
+    return group ? group.dataset.selected || "" : "";
+  }
+  const input = item.querySelector("input.blank");
+  return input ? input.value : "";
+}
+
+function setItemResult(item, correct){
+  if (item.dataset.kind === "choice") {
+    const group = item.querySelector(".choice-wrap");
+    group.classList.toggle("correct", correct);
+    group.classList.toggle("incorrect", !correct);
+  } else {
+    const input = item.querySelector("input.blank");
+    input.classList.remove("correct", "incorrect");
+    input.classList.add(correct ? "correct" : "incorrect");
+  }
+}
+
+const stationResults = {};
+
+function checkStation(index){
+  const station = stations[index];
+  const stationEl = document.getElementById(`station-${index}`);
+  let correctCount = 0;
+  const nums = Object.keys(station.blanks);
+
+  nums.forEach((num) => {
+    const item = stationEl.querySelector(`.answer-item[data-num="${num}"]`);
+    const userVal = normalize(getItemValue(item));
+    const isCorrect = station.blanks[num].answers.some((a) => normalize(a) === userVal);
+    setItemResult(item, isCorrect);
+    const explain = document.getElementById(`explain-${num}`);
+    if (item.dataset.kind === "choice") {
+      explain.textContent = "";
+      if (!isCorrect) {
+        const group = item.querySelector(".choice-wrap");
+        const correctBtn = Array.from(group.querySelectorAll(".choice-opt")).find(
+          (b) => normalize(b.dataset.value) === normalize(station.blanks[num].answers[0])
+        );
+        if (correctBtn) correctBtn.classList.add("answer-reveal");
+      }
+    } else {
+      explain.textContent = isCorrect ? "" : `→ ${station.blanks[num].answers[0]}`;
+    }
+    if (isCorrect) correctCount++;
+  });
+
+  stationResults[index] = { correct: correctCount, total: nums.length };
+
+  const feedback = document.getElementById(`feedback-${index}`);
+  feedback.textContent = `${correctCount} / ${nums.length} correct`;
+
+  document.querySelector(`[data-action="continue"][data-station="${index}"]`).hidden = false;
+  updateScore();
+}
+
+function goToNext(index){
+  const nextIndex = index + 1;
+  document.getElementById(`station-${index}`).hidden = true;
+  currentIndex = nextIndex;
+  updateStones();
+
+  if (nextIndex < stations.length) {
+    const nextEl = document.getElementById(`station-${nextIndex}`);
+    nextEl.hidden = false;
+    if (typeof nextEl.scrollIntoView === "function") nextEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    showFinal();
+  }
+}
+
+function updateScore(){
+  let total = 0;
+  document.querySelectorAll(".station:not(.bonus-station) .answer-item").forEach((item) => {
+    if (item.dataset.kind === "choice") {
+      const group = item.querySelector(".choice-wrap");
+      if (group && group.classList.contains("correct")) total++;
+    } else {
+      const input = item.querySelector("input.blank");
+      if (input && input.classList.contains("correct")) total++;
+    }
+  });
+  scoreDisplay.textContent = `Score: ${total} / ${TOTAL_BLANKS}`;
+  return total;
+}
+
+function getBonusScore(){
+  let total = 0;
+  let attempted = false;
+  document.querySelectorAll(".bonus-station .answer-item").forEach((item) => {
+    const input = item.querySelector("input.blank");
+    if (input && input.value.trim() !== "") attempted = true;
+    if (input && input.classList.contains("correct")) total++;
+  });
+  return { total, attempted };
+}
+
+function updateStones(){
+  const stones = stonesEl.querySelectorAll(".stone");
+  stones.forEach((stone, i) => {
+    stone.classList.toggle("done", i < currentIndex);
+    stone.classList.toggle("current", i === currentIndex);
+  });
+}
+
+function showFinal(){
+  const coreTotal = updateScore();
+  const bonus = getBonusScore();
+  finalEl.hidden = false;
+  document.getElementById("coreScoreDisplay").textContent = `${coreTotal} / ${TOTAL_BLANKS}`;
+  document.getElementById("bonusScoreDisplay").textContent = bonus.attempted ? `${bonus.total} / ${BONUS_BLANKS}` : `— / ${BONUS_BLANKS}`;
+
+  const pct = coreTotal / TOTAL_BLANKS;
+  let msg;
+  if (pct === 1) msg = "Perfect score in the core game — you're fully ready for the test!";
+  else if (pct >= 0.8) msg = "Great playing! Just a couple of rounds to double-check before the test.";
+  else if (pct >= 0.5) msg = "Good progress — check the weak spots below before test day.";
+  else msg = "A few more rounds of practice needed — use the list below to focus your revision.";
+  if (bonus.attempted && bonus.total === BONUS_BLANKS) msg += " And a clean sweep on the bonus round too — impressive!";
+  document.getElementById("finalMsg").textContent = msg;
+
+  const weakEl = document.getElementById("weakAreas");
+  const weak = CORE_STATIONS
+    .map((s) => ({ s, i: stations.indexOf(s), r: stationResults[stations.indexOf(s)] }))
+    .filter(({ r }) => r && r.correct < r.total);
+
+  if (weak.length === 0) {
+    weakEl.innerHTML = `<p class="all-good">🎉 No weak spots found in the core game — every round was fully correct!</p>`;
+  } else {
+    weakEl.innerHTML = `<h3>Worth another look before the test:</h3><ul>${weak
+      .map(({ s, r }) => `<li><strong>${s.sub} ${s.title}</strong> — ${r.correct}/${r.total} correct</li>`)
+      .join("")}</ul>`;
+  }
+
+  if (typeof finalEl.scrollIntoView === "function") finalEl.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+  currentIndex = 0;
+  Object.keys(stationResults).forEach((k) => delete stationResults[k]);
+  finalEl.hidden = true;
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+render();
+</script>
+</body>
+</html>
